@@ -1,5 +1,7 @@
 import requests
 from player import Player
+from rich import print
+from rich.table import Table
 
 class PlayerReader:
     def __init__(self, url):
@@ -33,14 +35,44 @@ class PlayerStats:
         return sorted_players
 
 def main():
-    url = "https://studies.cs.helsinki.fi/nhlstats/2023-24/players"
+    print("NHL statistics by nationality")
+    seasons = [
+        "2018-19",
+        "2019-20",
+        "2020-21",
+        "2021-22",
+        "2022-23",
+        "2023-24",
+        "2024-25",
+    ]
+
+    print(f"Select season [{"/".join(seasons)}]", end=": ")
+    selected_season = input()
+    if selected_season not in seasons:
+        return
+
+    url = f"https://studies.cs.helsinki.fi/nhlstats/{selected_season}/players"
     reader = PlayerReader(url)
     stats = PlayerStats(reader)
-    players = stats.top_scorers_by_nationality("FIN")
 
-    print(f"Players from FIN\n")
+    nationalities = set([player.nationality for player in reader.get_players()])
+    print(f"Select nationality [{"/".join(nationalities)}]", end=": ")
+    selected_nationality = input()
+    if selected_nationality not in nationalities:
+        return
+
+    table = Table(title=f"Top scorers from {selected_nationality} in the season {selected_season}")
+    table.add_column("Name")
+    table.add_column("Team")
+    table.add_column("Goals")
+    table.add_column("Assists")
+    table.add_column("Points")
+    
+    players = stats.top_scorers_by_nationality(selected_nationality)
     for player in players:
-        print(player)
+        table.add_row(player.name, player.team, str(player.goals), str(player.assists), str(player.goals + player.assists))
+
+    print(table)
 
 if __name__ == "__main__":
     main()
