@@ -20,8 +20,9 @@ class TestStatisticsService(unittest.TestCase):
         )
 
     def test_hae_pelaajaa(self):
-        for player in self.stats._players:
-            self.assertEqual(self.stats.search(player.name), player)
+        stub = PlayerReaderStub()
+        for player in stub.get_players():
+            self.assertEquals(self.stats.search(player.name), player)
 
         self.assertEqual(self.stats.search("NonExisting"), None)
 
