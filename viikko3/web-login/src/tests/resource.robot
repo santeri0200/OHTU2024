@@ -8,6 +8,7 @@ ${DELAY}         0.5 seconds
 ${HOME_URL}      http://${SERVER}
 ${LOGIN_URL}     http://${SERVER}/login
 ${REGISTER_URL}  http://${SERVER}/register
+${OHTU_URL}      http://${SERVER}/ohtu
 ${BROWSER}       firefox
 ${HEADLESS}      false
 
@@ -46,3 +47,6 @@ Go To Register Page
 
 Go To Starting Page
     Go to  ${HOME_URL}
+
+Go To Main Page
+    Go to  ${OHTU_URL}
