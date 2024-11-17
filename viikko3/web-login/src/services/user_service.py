@@ -41,6 +41,20 @@ class UserService:
             raise UserInputError("Username and password are required")
 
         # toteuta loput tarkastukset tänne ja nosta virhe virhetilanteissa
+        if len(username) < 3:
+            raise UserInputError("Username too short")
+
+        if not all('a' <= chr <= 'z' for chr in username):
+            raise UserInputError("Username should only contain letter from 'a' to 'z'")
+
+        if len(password) < 8:
+            raise UserInputError("Password too short")
+
+        if all('a' <= chr <= 'z' for chr in password):
+            raise UserInputError("Password should contain numbers and/or special characters")
+
+        if password != password_confirmation:
+            raise UserInputError("Password and the confirmation do not match")
 
 
 user_service = UserService()
