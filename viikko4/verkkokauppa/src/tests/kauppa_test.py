@@ -87,3 +87,36 @@ class TestKauppa(unittest.TestCase):
 
         # varmistetaan, että metodia tilisiirto on kutsuttu
         self.pankki_mock.tilisiirto.assert_called_with("pekka", 42, "12345", ANY, 5)
+
+    def test_ostosten_aloitus_nollaa_ostos_tiedot(self):
+        # alustetaan kauppa
+        kauppa = Kauppa(self.varasto_mock, self.pankki_mock, self.viitegeneraattori_mock)
+
+        # aloitetaan ostokset
+        kauppa.aloita_asiointi()
+        kauppa.lisaa_koriin(1)
+    
+        # yliajetaan ja tehdään seuraavat ostokset
+        kauppa.aloita_asiointi()
+        kauppa.tilimaksu("pekka", "12345")
+        self.pankki_mock.tilisiirto.assert_called_with("pekka", 42, "12345", ANY, 0)
+
+    def test_uusi_viitenumero_joka_tapahtumalle(self):
+        # alustetaan kauppa
+        kauppa = Kauppa(self.varasto_mock, self.pankki_mock, Mock(wraps=Viitegeneraattori()))
+
+        # tehdään ostokset
+        kauppa.aloita_asiointi()
+        kauppa.lisaa_koriin(1)
+        kauppa.lisaa_koriin(3)
+        kauppa.tilimaksu("pekka", "12345")
+
+        self.pankki_mock.tilisiirto.assert_called_with("pekka", 2, "12345", ANY, 5)
+
+        # tehdään ostokset
+        kauppa.aloita_asiointi()
+        kauppa.lisaa_koriin(1)
+        kauppa.lisaa_koriin(3)
+        kauppa.tilimaksu("pekka", "12345")
+
+        self.pankki_mock.tilisiirto.assert_called_with("pekka", 3, "12345", ANY, 5)
