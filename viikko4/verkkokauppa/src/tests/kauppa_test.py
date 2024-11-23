@@ -21,8 +21,7 @@ class TestKauppa(unittest.TestCase):
                 return 10
             elif tuote_id == 2:
                 return 10
-            elif tuote_id == 3:
-                return 0
+            return 0
 
         # tehdään toteutus hae_tuote-metodille
         def varasto_hae_tuote(tuote_id):
@@ -120,3 +119,67 @@ class TestKauppa(unittest.TestCase):
         kauppa.tilimaksu("pekka", "12345")
 
         self.pankki_mock.tilisiirto.assert_called_with("pekka", 3, "12345", ANY, 5)
+
+    def test_poista_toinen_tuote(self):
+        # alustetaan kauppa
+        kauppa = Kauppa(self.varasto_mock, self.pankki_mock, self.viitegeneraattori_mock)
+
+        # tehdään ostokset
+        kauppa.aloita_asiointi()
+        kauppa.lisaa_koriin(1)
+        kauppa.lisaa_koriin(2)
+        kauppa.poista_korista(2)
+        kauppa.tilimaksu("pekka", "12345")
+
+        self.pankki_mock.tilisiirto.assert_called_with("pekka", 42, "12345", ANY, 5)
+
+    def test_poista_olemattomia_tuoteita(self):
+        # alustetaan kauppa
+        kauppa = Kauppa(self.varasto_mock, self.pankki_mock, self.viitegeneraattori_mock)
+
+        # tehdään ostokset
+        kauppa.aloita_asiointi()
+        kauppa.lisaa_koriin(1)
+        kauppa.lisaa_koriin(2)
+        kauppa.poista_korista(3)
+        kauppa.poista_korista(-1)
+        kauppa.tilimaksu("pekka", "12345")
+
+        self.pankki_mock.tilisiirto.assert_called_with("pekka", 42, "12345", ANY, 12)
+
+    def test_varastosta_otto(self):
+        # alustetaan varasto
+        varasto = Varasto()
+        # alustetaan kauppa
+        kauppa = Kauppa(varasto, self.pankki_mock, self.viitegeneraattori_mock)
+
+        # tehdään ostokset
+        kauppa.aloita_asiointi()
+        kauppa.lisaa_koriin(1)
+
+    def test_varastostoon_palautus(self):
+        # alustetaan varasto
+        varasto = Varasto()
+        # alustetaan kauppa
+        kauppa = Kauppa(varasto, self.pankki_mock, self.viitegeneraattori_mock)
+
+        # tehdään ostokset
+        kauppa.aloita_asiointi()
+        kauppa.lisaa_koriin(1)
+        kauppa.poista_korista(1)
+
+    def test_varastosta_epaonnistunut_haku(self):
+        # alustetaan varasto
+        varasto = Varasto()
+        # alustetaan kauppa
+        kauppa = Kauppa(varasto, self.pankki_mock, self.viitegeneraattori_mock)
+
+        # tehdään ostokset
+        kauppa.aloita_asiointi()
+        kauppa.lisaa_koriin(1)
+        kauppa.poista_korista(-1)
+
+    def test_vertaa_tuotteita(self):
+        # hae tuotteet
+        tuote = self.varasto_mock.hae_tuote(1)
+        self.assertEqual(tuote, Tuote(1, "maito", 5))
