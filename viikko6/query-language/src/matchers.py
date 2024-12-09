@@ -13,6 +13,17 @@ class And:
 
         return True
 
+class Or:
+    def __init__(self, *matchers):
+        self._matchers = matchers
+
+    def test(self, player):
+        for matcher in self._matchers:
+            if matcher.test(player):
+                return True
+
+        return False
+
 class Not:
     def __init__(self, matcher):
         self._matcher = matcher
